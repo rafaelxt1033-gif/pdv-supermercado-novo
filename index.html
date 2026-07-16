@@ -3,87 +3,84 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema PDV - Automação Comercial</title>
+    <title>PDV Corporativo - Sistema de Automação Comercial</title>
     <!-- Bibliotecas Oficiais Obrigatórias -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     
     <style>
         :root { 
-            --primaria: #0f172a; 
+            --primaria: #020617; 
             --secundaria: #1e3a8a; 
-            --azul-claro: #3b82f6; 
-            --azul-escuro: #1e293b;
-            --sucesso: #10b981; 
-            --erro: #ef4444; 
-            --fundo: #0f172a; 
-            --texto: #f8fafc; 
+            --azul-eletrico: #2563eb; 
+            --azul-fundo: #0f172a;
             --card-fundo: #1e293b;
+            --sucesso: #10b981; 
+            --alerta: #f59e0b;
+            --erro: #ef4444; 
+            --texto: #f8fafc; 
+            --texto-mutado: #94a3b8;
         }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
-        body { background: var(--fundo); color: var(--texto); height: 100vh; overflow: hidden; display: flex; justify-content: center; align-items: center; }
+        body { background: var(--azul-fundo); color: var(--texto); height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
         
-        .tela { display: none; width: 100%; height: 100%; position: absolute; top: 0; left: 0; flex-direction: column; }
+        .tela { display: none; width: 100%; height: 100%; flex-direction: column; flex: 1; }
         .tela.ativa { display: flex; }
         
-        .login-wrapper { background: linear-gradient(135deg, #0f172a, #1e3a8a); justify-content: center; align-items: center; }
+        /* LOGIN CORPORATIVO */
+        .login-wrapper { background: linear-gradient(135deg, var(--primaria), var(--secundaria)); justify-content: center; align-items: center; position: absolute; height: 100vh; width: 100%; z-index: 9999; }
         .login-box { background: var(--card-fundo); padding: 40px; border-radius: 12px; width: 100%; max-width: 400px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); text-align: center; border: 1px solid var(--secundaria); }
         .input-group { margin-bottom: 15px; text-align: left; }
-        .input-group label { display: block; font-weight: 600; margin-bottom: 6px; color: #94a3b8; font-size: 14px; }
-        .input-group input, .input-group select { width: 100%; padding: 12px; border: 1px solid var(--secundaria); background: #0f172a; color: white; border-radius: 8px; font-size: 16px; outline: none; }
-        .input-group input:focus { border-color: var(--azul-claro); }
+        .input-group label { display: block; font-weight: 600; margin-bottom: 6px; color: var(--texto-mutado); font-size: 14px; }
+        .input-group input, .input-group select { width: 100%; padding: 12px; border: 1px solid var(--secundaria); background: var(--primaria); color: white; border-radius: 8px; font-size: 16px; outline: none; transition: 0.2s; }
+        .input-group input:focus { border-color: var(--azul-eletrico); }
         
-        .btn-universal { width: 100%; padding: 15px; background: var(--secundaria); color: white; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; font-weight: bold; transition: 0.2s; border: 1px solid var(--azul-claro); }
-        .btn-universal:hover { background: var(--azul-claro); }
+        .btn-universal { width: 100%; padding: 15px; background: var(--secundaria); color: white; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; font-weight: bold; transition: 0.2s; border: 1px solid var(--azul-eletrico); }
+        .btn-universal:hover { background: var(--azul-eletrico); }
         
-        .top-bar { background: #020617; color: white; padding: 0 25px; height: 65px; display: flex; justify-content: space-between; align-items: center; width: 100%; border-bottom: 2px solid var(--secundaria); }
-        .pdv-container { display: flex; width: 100%; height: calc(100% - 65px); background: #0f172a; }
+        /* LAYOUT PRINCIPAL */
+        .top-bar { background: var(--primaria); padding: 0 25px; height: 60px; display: flex; justify-content: space-between; align-items: center; width: 100%; border-bottom: 2px solid var(--secundaria); }
+        .abas-menu { display: flex; background: var(--primaria); padding: 0 25px; gap: 5px; height: 50px; align-items: flex-end; border-bottom: 1px solid var(--secundaria); }
+        .aba-btn { padding: 10px 20px; background: #1e293b; color: var(--texto-mutado); border: 1px solid var(--secundaria); border-bottom: none; border-radius: 6px 6px 0 0; cursor: pointer; font-weight: bold; font-size: 13px; transition: 0.2s; }
+        .aba-btn.ativa { background: var(--secundaria); color: white; border-color: var(--azul-eletrico); }
         
-        /* Sistema de Abas Sequenciais */
-        .abas-menu { display: flex; background: #020617; padding: 5px 20px 0 20px; gap: 5px; border-bottom: 1px solid var(--secundaria); }
-        .aba-btn { padding: 12px 24px; background: #1e293b; color: #94a3b8; border: 1px solid var(--secundaria); border-bottom: none; border-radius: 8px 8px 0 0; cursor: pointer; font-weight: bold; font-size: 14px; transition: 0.2s; }
-        .aba-btn.ativa { background: var(--secundaria); color: white; border-color: var(--azul-claro); }
+        .main-content { display: flex; flex: 1; height: calc(100vh - 110px); width: 100%; }
         
-        .conteudo-aba { display: none; width: 100%; height: 100%; flex-direction: column; }
+        /* ABAS CONFIGURÁVEIS */
+        .area-paineis { width: 55%; padding: 20px; display: flex; flex-direction: column; justify-content: space-between; background: var(--azul-fundo); border-right: 1px solid var(--secundaria); }
+        .conteudo-aba { display: none; flex-direction: column; flex: 1; }
         .conteudo-aba.ativa { display: flex; }
         
-        .cupom-area { width: 45%; background: #1e293b; padding: 30px; border-right: 1px solid var(--secundaria); display: flex; flex-direction: column; }
-        .cupom-header { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; font-weight: 600; padding-bottom: 12px; border-bottom: 2px solid var(--azul-claro); font-size: 14px; color: #94a3b8; }
-        .produtos-lista { flex-grow: 1; overflow-y: auto; margin-top: 10px; }
-        .item-cupom { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; padding: 10px 0; border-bottom: 1px dashed var(--secundaria); font-size: 15px; align-items: center; }
+        .terminal-log { background: var(--primaria); color: #38bdf8; padding: 12px; border-radius: 8px; height: 90px; overflow-y: auto; font-family: monospace; font-size: 12px; margin-bottom: 15px; border: 1px solid var(--secundaria); }
+        .input-codigo { width: 100%; padding: 15px; font-size: 32px; text-align: center; border: 3px solid var(--secundaria); background: var(--primaria); color: white; border-radius: 12px; outline: none; font-weight: bold; transition: 0.2s; }
+        .input-codigo:focus { border-color: var(--azul-eletrico); }
+
+        /* MONITOR DO CLIENTE E EXIBIÇÃO AMPLIADA */
+        .area-monitor-cliente { width: 45%; background: var(--primaria); padding: 25px; display: flex; flex-direction: column; justify-content: space-between; }
+        .display-produto-atual { background: var(--card-fundo); border-radius: 12px; padding: 25px; border: 2px solid var(--azul-eletrico); text-align: center; flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 280px; box-shadow: inset 0 0 20px rgba(0,0,0,0.5); }
+        .avatar-produto { width: 100px; height: 100px; background: var(--secundaria); border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 42px; margin-bottom: 15px; border: 2px solid var(--azul-eletrico); }
+        .nome-produto-cliente { font-size: 36px; font-weight: 900; color: white; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; line-height: 1.1; }
+        .valores-produto-cliente { display: flex; gap: 30px; margin-top: 10px; }
+        .valores-produto-cliente div { background: var(--primaria); padding: 10px 20px; border-radius: 8px; border: 1px solid var(--secundaria); }
+        .valores-produto-cliente span { display: block; font-size: 11px; color: var(--texto-mutado); font-weight: bold; }
+        .valores-produto-cliente strong { font-size: 24px; color: var(--sucesso); font-weight: 800; }
+
+        /* LISTA DO CUPOM FISCAL */
+        .cupom-tabela-container { background: var(--card-fundo); border-radius: 12px; height: 200px; overflow-y: auto; margin-top: 15px; border: 1px solid var(--secundaria); padding: 10px; }
+        .cupom-grid-header { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; font-weight: bold; font-size: 13px; color: var(--texto-mutado); border-bottom: 1px solid var(--secundaria); padding-bottom: 5px; margin-bottom: 5px; }
+        .item-grid-linha { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; font-size: 14px; padding: 6px 0; border-bottom: 1px dashed #334155; align-items: center; }
+
+        /* PAINEL DE FECHAMENTO */
+        .fechamento-painel { background: var(--card-fundo); padding: 20px; border-radius: 12px; display: grid; grid-template-columns: 1fr 1fr; gap: 15px; border: 1px solid var(--secundaria); margin-top: 15px; }
+        .fechamento-painel label { font-size: 14px; font-weight: bold; text-transform: uppercase; color: var(--texto-mutado); display: block; margin-bottom: 5px; }
         
-        .total-box { 
-            background: #1e293b; color: var(--erro); padding: 25px; border-radius: 12px; text-align: center; margin-top: 20px; border: 4px solid var(--erro);
-            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.15);
-        }
-        .total-box h3 { font-size: 16px; letter-spacing: 1px; margin-bottom: 5px; font-weight: 800; color: #94a3b8; }
-        .total-box p { font-size: 42px; font-weight: 900; }
-        
-        .operacao-area { width: 55%; padding: 30px; display: flex; flex-direction: column; background: #0f172a; justify-content: space-between; }
-        .terminal-log { background: #020617; color: #38bdf8; padding: 15px; border-radius: 8px; height: 110px; overflow-y: auto; font-family: monospace; font-size: 13px; margin-bottom: 15px; border: 1px solid var(--secundaria); }
-        
-        .fechamento-painel { 
-            background: #1e293b; 
-            padding: 25px; 
-            border-radius: 12px; 
-            display: grid; 
-            grid-template-columns: 1fr 1fr; 
-            gap: 15px; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            border: 1px solid var(--secundaria);
-        }
-        .fechamento-painel label { 
-            font-size: 17px !important; 
-            font-weight: 900 !important; 
-            text-transform: uppercase; 
-            letter-spacing: 1.5px; 
-            display: block;
-            margin-bottom: 8px;
-        }
-        
-        .dropdown-busca { display: none; position: absolute; left: 0; width: 100%; background: #1e293b; border: 2px solid var(--azul-claro); border-radius: 8px; max-height: 250px; overflow-y: auto; z-index: 999; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
-        .opcao-busca { padding: 14px; cursor: pointer; border-bottom: 1px solid var(--secundaria); display: flex; justify-content: space-between; font-weight: bold; font-size: 14px; }
-        .opcao-busca:hover, .opcao-busca.selecionada { background: var(--secundaria); color: white; }
+        .grand-total-box { background: #020617; border: 3px solid var(--erro); border-radius: 10px; padding: 15px; text-align: center; display: flex; flex-direction: column; justify-content: center; }
+        .grand-total-box h4 { font-size: 12px; color: var(--texto-mutado); letter-spacing: 1px; }
+        .grand-total-box p { font-size: 38px; font-weight: 900; color: var(--erro); }
+
+        .dropdown-busca { display: none; position: absolute; left: 0; width: 100%; background: #1e293b; border: 2px solid var(--azul-eletrico); border-radius: 8px; max-height: 200px; overflow-y: auto; z-index: 999; }
+        .opcao-busca { padding: 12px; cursor: pointer; border-bottom: 1px solid #334155; display: flex; justify-content: space-between; font-weight: bold; font-size: 14px; }
+        .opcao-busca:hover, .opcao-busca.selecionada { background: var(--secundaria); }
 
         @media print {
             body * { visibility: hidden; display: none !important; }
@@ -103,123 +100,153 @@
     <!-- TELA LOGIN -->
     <div id="tela-login" class="tela ativa login-wrapper">
         <div class="login-box">
-            <h2 style="margin-bottom: 20px;">SISTEMA PDV - ENTRADA</h2>
+            <h2 style="margin-bottom: 8px; letter-spacing: 1px;">SISTEMA OPERACIONAL PDV</h2>
+            <p style="color: var(--texto-mutado); font-size: 13px; margin-bottom: 25px;">Insira os dados do terminal de operação</p>
             <div class="input-group">
-                <label>Operador / Caixa</label>
-                <input type="text" id="login-usuario" placeholder="Ex: Caixa 01">
+                <label>Identificação do Caixa</label>
+                <input type="text" id="login-usuario" placeholder="Ex: CAIXA 01">
             </div>
             <div class="input-group">
-                <label>Senha de Acesso</label>
+                <label>Senha do Operador</label>
                 <input type="password" id="login-senha" placeholder="••••••••" onkeypress="if(event.key === 'Enter') fazerLogin()">
             </div>
-            <button class="btn-universal" onclick="fazerLogin()">Iniciar Turno</button>
+            <button class="btn-universal" onclick="fazerLogin()">Abrir Caixa (Iniciar Turno)</button>
         </div>
     </div>
 
-    <!-- TELA CAIXA PRINCIPAL -->
+    <!-- TELA CAIXA SISTEMA -->
     <div id="tela-pdv" class="tela">
+        <!-- Barra de Status do Sistema -->
         <div class="top-bar">
-            <div><strong>SISTEMA METROPOLITANO</strong> | Operador Ativo: <span id="caixa-nome-status" style="color: var(--azul-claro);">Caixa 01</span></div>
+            <div><strong>PDV MASTER SETUP</strong> | Terminal Ativo: <span id="caixa-nome-status" style="color: var(--azul-eletrico); font-weight: 800;">CAIXA 01</span></div>
             <div style="display: flex; gap: 8px;">
-                <button class="btn-universal" onclick="cancelarCupom()" style="background: var(--erro); padding: 8px; width: auto; border: none;">Cancelar Venda</button>
-                <button class="btn-universal" onclick="sair()" style="background: #475569; padding: 8px; width: auto; border: none;">Sair</button>
+                <button onclick="cancelarCupom()" style="background: var(--erro); padding: 8px 15px; border: none; border-radius: 6px; color: white; font-weight: bold; cursor: pointer;">Cancelar Compra</button>
+                <button onclick="sair()" style="background: #475569; padding: 8px 15px; border: none; border-radius: 6px; color: white; font-weight: bold; cursor: pointer;">Fechar Turno</button>
             </div>
         </div>
         
-        <!-- Menu de Abas Sequenciais -->
+        <!-- Menu Sequencial de Abas (F1, F2, F3) -->
         <div class="abas-menu">
-            <button class="aba-btn ativa" id="btn-aba-1" onclick="mudarAba(1)">[F1] Bipador / Geral</button>
-            <button class="aba-btn" id="btn-aba-2" onclick="mudarAba(2)">[F2] Balança / Peso</button>
-            <button class="aba-btn" id="btn-aba-3" onclick="mudarAba(3)">[F3] Painel ADM</button>
+            <button class="aba-btn ativa" id="btn-aba-1" onclick="mudarAba(1)">[F1] Bipador Comercial</button>
+            <button class="aba-btn" id="btn-aba-2" onclick="mudarAba(2)">[F2] Balança de Pesagem</button>
+            <button class="aba-btn" id="btn-aba-3" onclick="mudarAba(3)">[F3] Configurações ADM</button>
         </div>
 
-        <div class="pdv-container">
-            <!-- Esquerda fixa: Cupom Fiscal Visual -->
-            <div class="cupom-area">
-                <div class="cupom-header"><span>Descrição Item</span><span style="text-align:center;">Qtd</span><span style="text-align:right;">Unit</span><span style="text-align:right;">Total</span></div>
-                <div class="produtos-lista" id="lista-cupom"></div>
-                <div class="total-box"><h3>TOTAL ACUMULADO</h3><p>R$ <span id="valor-total">0.00</span></p></div>
-            </div>
-
-            <!-- Direita dinâmica: Conteúdo das Abas -->
-            <div class="operacao-area">
-                <div class="terminal-log" id="log-sistema"><div>[SISTEMA] Terminal operacional pronto.</div></div>
+        <!-- Conteúdo Dividido (Lado do Caixa vs Lado do Cliente) -->
+        <div class="main-content">
+            
+            <!-- LADO ESQUERDO: Painéis de Lógica e Comandos do Caixa -->
+            <div class="area-paineis">
+                <div class="terminal-log" id="log-sistema"><div>[SISTEMA] Inicialização do núcleo operacional concluída.</div></div>
                 
-                <!-- ABA 1: BIPADOR / AUTOMÁTICO -->
+                <!-- ABA 1: ENTRADA AUTOMÁTICA / BIPADOR -->
                 <div id="conteudo-aba-1" class="conteudo-aba ativa">
-                    <h3 style="margin-bottom: 15px; color: var(--azul-claro);">Modo Entrada Geral de Itens</h3>
+                    <h3 style="margin-bottom: 12px; color: var(--azul-eletrico);">Modo Bipagem e Entrada Manual</h3>
                     <div style="position: relative; display: flex; gap: 8px; margin-bottom: 20px;">
-                        <input type="number" id="input-qtd-manual" value="1" style="width: 80px; text-align: center; font-size: 24px; border: 2px solid var(--secundaria); background: #020617; color: white; border-radius: 12px; font-weight: bold;">
+                        <input type="number" id="input-qtd-manual" value="1" style="width: 80px; text-align: center; font-size: 24px; border: 2px solid var(--secundaria); background: var(--primaria); color: white; border-radius: 12px; font-weight: bold;">
                         <div style="position: relative; flex: 1;">
                             <div id="dropdown-sugestoes" class="dropdown-busca" style="bottom: 100%; margin-bottom: 5px; width: 100%;"></div>
-                            <input type="text" class="input-codigo" id="codigo-barras" placeholder="Bipe ou digite o nome..." oninput="filtrarPorNome(this.value)" onkeydown="navegarSugestoes(event)" autocomplete="off">
+                            <input type="text" class="input-codigo" id="codigo-barras" placeholder="Passe o leitor ou digite o nome do produto..." oninput="filtrarPorNome(this.value)" onkeydown="navegarSugestoes(event)" autocomplete="off">
                         </div>
                     </div>
                 </div>
 
-                <!-- ABA 2: BALANÇA / PESO -->
+                <!-- ABA 2: INTEGRAÇÃO COM BALANÇA -->
                 <div id="conteudo-aba-2" class="conteudo-aba">
-                    <h3 style="margin-bottom: 15px; color: var(--azul-claro);">Modo Integração Pesagem Pesados</h3>
-                    <div class="area-balanca" style="background: var(--card-fundo); padding: 25px; border-radius: 12px; border: 1px solid var(--secundaria);">
+                    <h3 style="margin-bottom: 12px; color: var(--azul-eletrico);">Modo Captura de Peso / KG</h3>
+                    <div style="background: var(--card-fundo); padding: 20px; border-radius: 12px; border: 1px solid var(--secundaria);">
                         <div class="input-group">
-                            <label>Peso lido na Balança (KG)</label>
+                            <label>Massa Computada pela Balança (KG)</label>
                             <input type="number" id="peso-balanca" placeholder="0.000" step="0.001">
                         </div>
                         <div class="input-group" style="position: relative;">
-                            <label>Identificação do Item de Hortifrúti</label>
-                            <input type="text" id="codigo-balanca" placeholder="Digite o nome do produto..." oninput="filtrarNomeBalanca(this.value)" onkeydown="navegSugestoesBalanca(event)" autocomplete="off">
+                            <label>Buscar Produto Pesável</label>
+                            <input type="text" id="codigo-balanca" placeholder="Digite o nome do item de hortifrúti..." oninput="filtrarNomeBalanca(this.value)" onkeydown="navegSugestoesBalanca(event)" autocomplete="off">
                             <div id="dropdown-balanca" class="dropdown-busca" style="top: 100%; margin-top: 5px;"></div>
                         </div>
                     </div>
                 </div>
 
-                <!-- ABA 3: PAINEL ADMINISTRATIVO -->
+                <!-- ABA 3: ADMINISTRAÇÃO E CONEXÃO CLOUD -->
                 <div id="conteudo-aba-3" class="conteudo-aba">
-                    <h3 style="margin-bottom: 15px; color: var(--azul-claro);">Gestão e Chaves Cloud Sincronização</h3>
-                    <div style="background: var(--card-fundo); padding: 20px; border-radius: 12px; border: 1px solid var(--secundaria); height: 100%; overflow-y: auto;">
-                        <div class="dashboard-area" style="padding: 0; margin-bottom: 20px;">
-                            <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-                                <div style="flex: 1; background: #020617; padding: 15px; border-radius: 8px; text-align: center;">
-                                    <p style="font-size: 12px; color: #94a3b8;">FAD. DO DIA</p>
-                                    <h3 id="dash-total" style="color: var(--sucesso); font-size: 24px;">R$ 0,00</h3>
-                                </div>
-                                <div style="flex: 1; background: #020617; padding: 15px; border-radius: 8px; text-align: center;">
-                                    <p style="font-size: 12px; color: #94a3b8;">CUPONS</p>
-                                    <h3 id="dash-qtd" style="color: var(--azul-claro); font-size: 24px;">0</h3>
-                                </div>
+                    <h3 style="margin-bottom: 12px; color: var(--azul-eletrico);">Painel de Sincronização e Auditoria</h3>
+                    <div style="background: var(--card-fundo); padding: 15px; border-radius: 12px; border: 1px solid var(--secundaria); overflow-y: auto;">
+                        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                            <div style="flex: 1; background: var(--primaria); padding: 10px; border-radius: 8px; text-align: center; border: 1px solid var(--secundaria);">
+                                <p style="font-size: 11px; color: var(--texto-mutado);">BRUTO EXPEDIENTE</p>
+                                <h3 id="dash-total" style="color: var(--sucesso); font-size: 22px;">R$ 0,00</h3>
+                            </div>
+                            <div style="flex: 1; background: var(--primaria); padding: 10px; border-radius: 8px; text-align: center; border: 1px solid var(--secundaria);">
+                                <p style="font-size: 11px; color: var(--texto-mutado);">CUPONS EMITIDOS</p>
+                                <h3 id="dash-qtd" style="color: var(--azul-eletrico); font-size: 22px;">0</h3>
                             </div>
                         </div>
-                        <div class="input-group">
-                            <label>Repositório Master GitHub</label>
+                        <div class="input-group" style="margin-bottom: 10px;">
+                            <label>Diretório Nuvem GitHub</label>
                             <input type="text" id="cloud-repo" placeholder="usuario/repositorio">
                         </div>
-                        <div class="input-group">
-                            <label>Chave Token Autenticação API</label>
+                        <div class="input-group" style="margin-bottom: 15px;">
+                            <label>Token de Acesso Privado API</label>
                             <input type="password" id="cloud-token" placeholder="ghp_xxxxxxxxxxxx">
                         </div>
                         <div style="display: flex; gap: 8px;">
-                            <button onclick="salvarConfiguracaoNuvem()" class="btn-universal" style="padding: 10px; font-size: 13px;">Salvar Ajustes</button>
-                            <button onclick="baixarRelatorioContador()" class="btn-universal" style="padding: 10px; font-size: 13px; background: var(--sucesso); border-color: var(--sucesso);">Relatório Contador</button>
+                            <button onclick="salvarConfiguracaoNuvem()" class="btn-universal" style="padding: 10px; font-size: 13px;">Salvar Chaves</button>
+                            <button onclick="baixarRelatorioContador()" class="btn-universal" style="padding: 10px; font-size: 13px; background: var(--azul-eletrico); border-color: var(--azul-eletrico);">Planilha Contador</button>
                         </div>
                     </div>
                 </div>
 
-                <!-- SUB-PAINEL DE FECHAMENTO (FIXO NO RODAPÉ DA DIREITA) -->
+                <!-- SUB-PAINEL INFERIOR DE FECHAMENTO FINANCEIRO -->
                 <div class="fechamento-painel">
                     <div class="input-group" style="margin: 0;">
-                        <label style="color: #facc15;">Tipo Liquidação</label>
+                        <label style="color: #e2e8f0;">Forma Liquidação</label>
                         <select id="forma-pagamento"><option>Dinheiro</option><option>PIX</option><option>Cartão</option></select>
                     </div>
                     <div class="input-group" style="margin: 0;">
-                        <label style="color: #4ade80;">Valor Entregue (R$)</label>
+                        <label style="color: #e2e8f0;">Valor Recebido (R$)</label>
                         <input type="number" id="valor-pago" placeholder="0.00" oninput="calcularTroco()" onkeydown="fecharVendaComEnter(event)">
                     </div>
-                    <div style="grid-column: span 2; text-align:right; font-weight:bold;" id="box-troco">Troco: R$ 0.00</div>
+                    <div style="grid-column: span 2; text-align:right; font-weight:bold; font-size: 24px; color: var(--azul-eletrico);" id="box-troco">Troco: R$ 0.00</div>
                     
-                    <button class="btn-universal" onclick="finalizarVenda(false)" style="background: #334155; border-color: #475569;">SEM NOTA</button>
-                    <button class="btn-universal" id="btn-finalizar-fiscal" onclick="finalizarVenda(true)" style="background: var(--fiscal); border-color: var(--azul-claro);">EMITIR NFC-e</button>
+                    <button class="btn-universal" onclick="finalizarVenda(false)" style="background: #334155; border-color: #475569;">[F4] FECHAR SEM NOTA</button>
+                    <button class="btn-universal" id="btn-finalizar-fiscal" onclick="finalizarVenda(true)" style="background: var(--fiscal); border-color: var(--azul-eletrico);">[F4] EMITIR NFC-e</button>
                 </div>
             </div>
+            
+            <!-- LADO DIREITO: Monitor Ampliado do Cliente e Grade Fiscal de Itens -->
+            <div class="area-monitor-cliente">
+                <!-- Painel de Transparência do Cliente (Exibição Gigante) -->
+                <div class="display-produto-atual">
+                    <div class="avatar-produto" id="cliente-avatar">🛒</div>
+                    <div class="nome-produto-cliente" id="cliente-nome">CAIXA LIVRE</div>
+                    <div class="valores-produto-cliente">
+                        <div>
+                            <span>QUANTIDADE</span>
+                            <strong id="cliente-qtd" style="color: white;">0</strong>
+                        </div>
+                        <div>
+                            <span>VALOR UNITÁRIO</span>
+                            <strong id="cliente-unit" style="color: var(--azul-eletrico);">R$ 0,00</strong>
+                        </div>
+                        <div>
+                            <span>VALOR TOTAL</span>
+                            <strong id="cliente-total">R$ 0,00</strong>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Grade Visual do Cupom Acumulado -->
+                <div class="grand-total-box" style="margin-top: 15px;">
+                    <h4>SUBTOTAL DA COMPRA</h4>
+                    <p>R$ <span id="valor-total">0.00</span></p>
+                </div>
+                
+                <div class="cupom-tabela-container">
+                    <div class="cupom-grid-header"><span>Descrição Item</span><span style="text-align:center;">Qtd</span><span style="text-align:right;">Unit</span><span style="text-align:right;">Total</span></div>
+                    <div class="produtos-lista" id="lista-cupom"></div>
+                </div>
+            </div>
+            
         </div>
     </div>
 
@@ -243,7 +270,7 @@
             estoqueCloud = busterProdutosBackup;
             atualizarDashboard();
             
-            // Atalhos globais lógicos do teclado
+            // Mapeamento lógico de teclas operacionais (F1, F2, F3, F4)
             document.addEventListener('keydown', (e) => {
                 if (e.key === 'F1') { e.preventDefault(); mudarAba(1); }
                 if (e.key === 'F2') { e.preventDefault(); mudarAba(2); }
@@ -254,13 +281,13 @@
 
         function fazerLogin() {
             const user = document.getElementById('login-usuario').value.trim();
-            if(!user) return alert("Insira a identificação do caixa!");
+            if(!user) return alert("Por favor, identifique o número ou nome do caixa!");
             document.getElementById('caixa-nome-status').innerText = user.toUpperCase();
             mostrarTela('tela-pdv');
             setTimeout(() => document.getElementById('codigo-barras').focus(), 200);
         }
 
-        function sair() { mostrarTela('tela-login'); cupomAtual = []; renderizarCupom(); }
+        function sair() { mostrarTela('tela-login'); resetarMonitorCliente(); cupomAtual = []; renderizarCupom(); }
         
         function mostrarTela(id) {
             document.querySelectorAll('.tela').forEach(t => t.classList.remove('ativa'));
@@ -269,9 +296,9 @@
 
         function mudarAba(num) {
             if (num === 3) {
-                const senha = prompt("Aba Administrativa Restrita. Digite a senha do gerente:");
+                const senha = prompt("Área Restrita do Gerente. Insira a credencial:");
                 if (senha !== 'kd041022') {
-                    alert("Acesso negado!");
+                    alert("Credencial inválida! Acesso bloqueado.");
                     return;
                 }
             }
@@ -341,7 +368,7 @@
                 let qtd = parseFloat(document.getElementById('input-qtd-manual').value || 1);
                 if(txt.includes('*')) { qtd = parseFloat(txt.split('*')[0]); txt = txt.split('*')[1]; }
                 if(estoqueCloud[txt]) { addCupom(txt, qtd); } 
-                else { alert("Código não encontrado!"); document.getElementById('codigo-barras').value = ''; }
+                else { alert("Código fiscal de barras não cadastrado!"); document.getElementById('codigo-barras').value = ''; }
             }
         }
 
@@ -351,27 +378,53 @@
             }
         }
 
+        // Atualiza o Display Monitor do Cliente em Tempo Real com Letras Gigantes
+        function atualizarMonitorCliente(nome, qtd, unit, total, isPeso=false) {
+            document.getElementById('cliente-avatar').innerText = isPeso ? "⚖️" : "📦";
+            document.getElementById('cliente-nome').innerText = nome;
+            document.getElementById('cliente-qtd').innerText = isPeso ? qtd.toFixed(3) : qtd;
+            document.getElementById('cliente-unit').innerText = "R$ " + formatarMoeda(unit);
+            document.getElementById('cliente-total').innerText = "R$ " + formatarMoeda(total);
+        }
+
+        function resetarMonitorCliente() {
+            document.getElementById('cliente-avatar').innerText = "🛒";
+            document.getElementById('cliente-nome').innerText = "CAIXA LIVRE";
+            document.getElementById('cliente-qtd').innerText = "0";
+            document.getElementById('cliente-unit').innerText = "R$ 0,00";
+            document.getElementById('cliente-total').innerText = "R$ 0,00";
+        }
+
         function addCupom(cod, qtd) {
-            const p = estoqueCloud[cod]; cupomAtual.push({ nome: p.nome, qtd: qtd, unit: p.preco, total: p.preco * qtd });
+            const p = estoqueCloud[cod]; let itemTotal = p.preco * qtd;
+            cupomAtual.push({ nome: p.nome, qtd: qtd, unit: p.preco, total: itemTotal });
             document.getElementById('codigo-barras').value = ''; document.getElementById('dropdown-sugestoes').style.display = 'none';
-            document.getElementById('input-qtd-manual').value = "1"; render`Cupom`;
+            document.getElementById('input-qtd-manual').value = "1"; 
+            atualizarMonitorCliente(p.nome, qtd, p.preco, itemTotal, false);
+            renderizarCupom();
         }
 
         function addCupomBalanca(cod) {
             let peso = parseFloat(document.getElementById('peso-balanca').value);
-            if (!peso || peso <= 0) return alert("Preencha o peso da pesagem válida!");
-            const p = estoqueCloud[cod]; cupomAtual.push({ nome: p.nome, qtd: peso, unit: p.preco, total: p.preco * peso });
+            if (!peso || peso <= 0) return alert("Por favor, registre uma pesagem válida estável na balança!");
+            const p = estoqueCloud[cod]; let itemTotal = p.preco * peso;
+            cupomAtual.push({ nome: p.nome, qtd: peso, unit: p.preco, total: itemTotal });
             document.getElementById('peso-balanca').value = ''; document.getElementById('codigo-balanca').value = '';
-            document.getElementById('dropdown-balanca').style.display = 'none'; render`Cupom`;
+            document.getElementById('dropdown-balanca').style.display = 'none'; 
+            atualizarMonitorCliente(p.nome, peso, p.preco, itemTotal, true);
+            renderizarCupom();
+            mudarAba(1);
         }
 
         function renderizarCupom() {
-            const lista = document.getElementById('lista-cupom'); lista.innerHTML = ''; totalVenda = 0;
+            const lista = document.querySelectorAll('#valor-total');
+            const container = document.getElementById('lista-cupom'); container.innerHTML = ''; totalVenda = 0;
             cupomAtual.forEach(item => {
                 totalVenda += item.total;
-                lista.innerHTML += `<div class="item-cupom"><span>${item.nome}</span><span style="text-align:center">${item.qtd}</span><span style="text-align:right">${item.unit.toFixed(2)}</span><span style="text-align:right; font-weight:bold; color:var(--azul-claro);">${item.total.toFixed(2)}</span></div>`;
+                container.innerHTML += `<div class="item-grid-linha"><span>${item.nome}</span><span style="text-align:center">${Number.isInteger(item.qtd) ? item.qtd : item.qtd.toFixed(3)}</span><span style="text-align:right">${item.unit.toFixed(2)}</span><span style="text-align:right; font-weight:bold; color:var(--azul-eletrico);">${item.total.toFixed(2)}</span></div>`;
             });
-            document.getElementById('valor-total').innerText = totalVenda.toFixed(2); calcularTroco();
+            lista.forEach(el => el.innerText = totalVenda.toFixed(2));
+            calcularTroco();
         }
 
         function calcularTroco() {
@@ -381,11 +434,13 @@
         }
 
         function formatarMoeda(valor) { return valor.toFixed(2).replace('.', ','); }
-        function registrarLog(msg) { document.getElementById('log-sistema').innerHTML = `<div>[LOG] ${msg}</div>`; }
-        function cancelarCupom() { cupomAtual = []; renderizarCupom(); }
+        function registrarLog(msg) { document.getElementById('log-sistema').innerHTML = `<div>[REGISTRO] ${msg}</div>`; }
+        function cancelarCupom() { cupomAtual = []; resetarMonitorCliente(); renderizarCupom(); }
+        function pularDaUnidadeProBipe(e) { if (e.key === 'Enter') { e.preventDefault(); document.getElementById('codigo-barras').focus(); } }
+        function fecharVendaComEnter(e) { if (e.key === 'Enter') { e.preventDefault(); finalizarVenda(true); } }
 
         function finalizarVenda(nfce) {
-            if(cupomAtual.length === 0) return alert("Caixa vazio!");
+            if(cupomAtual.length === 0) return alert("Nenhum item na grade de vendas!");
             const formaPagto = document.getElementById('forma-pagamento').value;
             vendasRealizadas.push({ data: new Date().toLocaleString('pt-BR'), total: totalVenda, pagamento: formaPagto });
             localStorage.setItem('vendas_realizadas', JSON.stringify(vendasRealizadas));
@@ -393,7 +448,7 @@
             
             if(nfce) { gerarNFCe(formaPagto); } else { gerarCupomPDV(formaPagto); }
             window.print();
-            cupomAtual = []; document.getElementById('valor-pago').value = ''; renderizarCupom();
+            cupomAtual = []; document.getElementById('valor-pago').value = ''; resetarMonitorCliente(); renderizarCupom();
             mudarAba(1);
         }
 
@@ -408,9 +463,9 @@
             let dataAtual = new Date().toLocaleString('pt-BR');
             let pago = parseFloat(document.getElementById('valor-pago').value || totalVenda);
             let troco = pago > totalVenda ? pago - totalVenda : 0;
-            let html = `<div id="recibo-impressao"><div class="txt-centro" style="font-size:14px; font-weight: bold;">CUPOM DA COMPRA</div><div class="txt-centro">${dataAtual}</div><div class="linha-tracejada"></div><div class="flex-space"><span>Qtd Item</span><span>Total</span></div><div class="linha-tracejada"></div>`;
+            let html = `<div id="recibo-impressao"><div class="txt-centro" style="font-size:14px; font-weight: bold;">EXTRATO DE COMPRA</div><div class="txt-centro">${dataAtual}</div><div class="linha-tracejada"></div><div class="flex-space"><span>Qtd Item</span><span>Total</span></div><div class="linha-tracejada"></div>`;
             cupomAtual.forEach(i => { html += `<div class="flex-space"><span>${i.qtd} x ${i.nome}</span><span>${formatarMoeda(i.total)}</span></div>`; });
-            html += `<div class="linha-tracejada"></div><div class="flex-space"><span>TOTAL</span><span>R$ ${formatarMoeda(totalVenda)}</span></div><div class="flex-space"><span>PAGO</span><span>R$ ${formatarMoeda(pago)}</span></div><div class="flex-space"><span>TROCO</span><span>R$ ${formatarMoeda(troco)}</span></div></div>`;
+            html += `<div class="linha-tracejada"></div><div class="flex-space"><span>TOTAL COMERCIAL</span><span>R$ ${formatarMoeda(totalVenda)}</span></div><div class="flex-space"><span>VALOR PAGO</span><span>R$ ${formatarMoeda(pago)}</span></div><div class="flex-space"><span>VALOR TROCO</span><span>R$ ${formatarMoeda(troco)}</span></div></div>`;
             let div = document.createElement('div'); div.innerHTML = html; document.body.appendChild(div.firstElementChild);
         }
 
@@ -419,30 +474,37 @@
             let dataStr = new Date().toLocaleDateString('pt-BR'); let horaStr = new Date().toLocaleTimeString('pt-BR');
             let pago = parseFloat(document.getElementById('valor-pago').value || totalVenda);
             let troco = pago > totalVenda ? pago - totalVenda : 0;
-            let html = `<div id="recibo-impressao"><div class="txt-centro" style="font-weight:bold;">ESTABELECIMENTO FISCAL COMERCIAL</div><div class="txt-centro">DOCUMENTO AUXILIAR DA NFC-e</div><div class="linha-tracejada"></div>`;
+            let html = `<div id="recibo-impressao"><div class="txt-centro" style="font-weight:bold; font-size: 13px;">COMPANHIA SUPERMERCADOS INTEGRADOS</div><div class="txt-centro">DOCUMENTO AUXILIAR DA NFC-e</div><div class="linha-tracejada"></div>`;
             cupomAtual.forEach((i, index) => { html += `<div>${index+1} - ${i.nome}</div><div class="flex-space"><span>${i.qtd} UN X ${formatarMoeda(i.unit)}</span><span>R$ ${formatarMoeda(i.total)}</span></div>`; });
-            html += `<div class="linha-tracejada"></div><div class="flex-space"><span>VALOR TOTAL</span><span>R$ ${formatarMoeda(totalVenda)}</span></div><div class="flex-space"><span>TROCO R$</span><span>R$ ${formatarMoeda(troco)}</span></div><div id="qrcode-recibo"></div></div>`;
+            html += `<div class="linha-tracejada"></div><div class="flex-space"><span>VALOR BRUTO</span><span>R$ ${formatarMoeda(totalVenda)}</span></div><div class="flex-space"><span>TROCO CALCULADO</span><span>R$ ${formatarMoeda(troco)}</span></div><div id="qrcode-recibo"></div></div>`;
             let div = document.createElement('div'); div.innerHTML = html; document.body.appendChild(div.firstElementChild);
             new QRCode(document.getElementById("qrcode-recibo"), { text: "https://www.set.rn.gov.br/nfce/consulta", width: 130, height: 130 });
         }
 
         function baixarRelatorioContador() {
-            if (vendasRealizadas.length === 0) return alert("Sem registros!");
+            if (vendasRealizadas.length === 0) return alert("Sem registros contábeis salvos no expediente!");
             let resumo = { "Dinheiro": 0, "PIX": 0, "Cartão": 0 }; let detalhes = [];
             vendasRealizadas.forEach(v => { resumo[v.pagamento] += v.total; detalhes.push({ "Data": v.data, "Pagamento": v.pagamento, "Total": v.total }); });
             let wb = XLSX.utils.book_new();
-            let wsResumo = XLSX.utils.json_to_sheet([{ "Métrica": "Total Geral", "Valor": resumo.Dinheiro + resumo.PIX + resumo.Cartão }, { "Métrica": "Dinheiro", "Valor": resumo.Dinheiro }, { "Métrica": "PIX", "Valor": resumo.PIX }, { "Métrica": "Cartão", "Valor": resumo.Cartão }]);
-            XLSX.utils.book_append_sheet(wb, wsResumo, "Contabilidade");
-            XLSX.writeFile(wb, "Relatorio_Contador.xlsx");
+            let wsResumo = XLSX.utils.json_to_sheet([{ "Métrica": "Faturamento Bruto Geral", "Valor": resumo.Dinheiro + resumo.PIX + resumo.Cartão }, { "Métrica": "Faturamento Dinheiro", "Valor": resumo.Dinheiro }, { "Métrica": "Faturamento PIX", "Valor": resumo.PIX }, { "Métrica": "Faturamento Cartão", "Valor": resumo.Cartão }]);
+            XLSX.utils.book_append_sheet(wb, wsResumo, "Fechamento de Caixa");
+            XLSX.writeFile(wb, "Relatorio_Fechamento_Contador.xlsx");
         }
 
         function salvarConfiguracaoNuvem() {
             localStorage.setItem('cloud_repo', document.getElementById('cloud-repo').value.trim());
             localStorage.setItem('cloud_token', document.getElementById('cloud-token').value.trim());
-            alert("Configurações locais de segurança memorizadas!");
+            alert("Parâmetros de chaves cloud salvos no terminal local!");
         }
 
-        const busterProdutosBackup = {"7896002109000": {"nome": "51 LATA 350ML", "preco": 4.5}, "1": {"nome": "ABACATE KG", "preco": 8.99}, "119": {"nome": "TOMATE KG", "preco": 4.99}};
+        // BASE DE BACKUP INTEGRADA DE CONTINGÊNCIA
+        const busterProdutosBackup = {
+            "7896002109000": {"nome": "51 LATA 350ML", "preco": 4.50}, 
+            "1": {"nome": "ABACATE REGIONAL KG", "preco": 8.99}, 
+            "119": {"nome": "TOMATE SELECIONADO KG", "preco": 4.99},
+            "7891000102640": {"nome": "AVEIA EM FLOCOS NESTLE 170G", "preco": 4.99},
+            "7894900027013": {"nome": "COCA COLA PET 2 LITROS", "preco": 11.99}
+        };
     </script>
 </body>
 </html>
